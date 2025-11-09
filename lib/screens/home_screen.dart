@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../banner/banner_state.dart';
 import '../banner/use_banner.dart';
+import '../banner/use_route_aware_reset.dart';
 
 class HomeScreen extends HookConsumerWidget {
   const HomeScreen({super.key});
@@ -16,14 +16,10 @@ class HomeScreen extends HookConsumerWidget {
     final bannerState = ref.watch(bannerStateProvider);
     final notifier = ref.read(bannerStateProvider.notifier);
 
-    useEffect(() {
-      var active = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!active) return;
-        notifier.reset(bannerId);
-      });
-      return () => active = false;
-    }, const []);
+    useRouteAwareReset(
+      context: context,
+      onActive: () => notifier.reset(bannerId),
+    );
 
     final shouldShow = !bannerState.isDismissed(bannerId);
 

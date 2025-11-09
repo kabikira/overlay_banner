@@ -4,12 +4,14 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../screens/detail_screen.dart';
 import '../screens/home_screen.dart';
+import 'route_observer.dart';
 
 final _rootKey = GlobalKey<NavigatorState>();
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     navigatorKey: _rootKey,
+    observers: [routeObserver],
     routes: [
       GoRoute(
         path: '/',
