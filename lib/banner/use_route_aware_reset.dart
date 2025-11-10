@@ -41,7 +41,13 @@ class _BannerRouteAware extends RouteAware {
   final VoidCallback onActive;
 
   void _scheduleReset() {
-    scheduleMicrotask(onActive);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+        onActive();
+      } else {
+        Future.microtask(onActive);
+      }
+    });
   }
 
   @override
