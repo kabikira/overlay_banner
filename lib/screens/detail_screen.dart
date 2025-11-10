@@ -1,10 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../banner/banner_state.dart';
+import '../banner/route_activation_provider.dart';
 import '../banner/use_banner.dart';
-import '../banner/use_route_aware_reset.dart';
 
 class DetailScreen extends HookConsumerWidget {
   const DetailScreen({super.key});
@@ -16,10 +19,17 @@ class DetailScreen extends HookConsumerWidget {
     final bannerState = ref.watch(bannerStateProvider);
     final notifier = ref.read(bannerStateProvider.notifier);
 
-    useRouteAwareReset(
-      context: context,
-      onActive: () => notifier.reset(bannerId),
-    );
+    useEffect(() {
+      final subscription = ref.listenManual<int>(
+        routeActivationProvider.select((state) => state.versionOf('detail')),
+        (previous, next) {
+          if (previous == next) return;
+          scheduleMicrotask(() => notifier.reset(bannerId));
+        },
+        fireImmediately: true,
+      );
+      return subscription.close;
+    }, [ref, notifier]);
 
     final shouldShow = !bannerState.isDismissed(bannerId);
 
